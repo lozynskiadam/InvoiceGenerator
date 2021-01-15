@@ -315,17 +315,16 @@ class Validator
         if(!file_exists($this->config['templates_path'] . $this->config['template'])) {
             throw new InvoiceException('template file not exists');
         }
+    }
+
+    private function validateConfigColumns()
+    {
         foreach($this->config['columns'] as $column) {
             if(!in_array($column, Constrains::POSITIONS_COLUMN_LIST)) {
                 $exc = sprintf('invalid columns config - column "%s" is not a valid column', $column);
                 throw new InvoiceException($exc);
             }
         }
-    }
-
-    private function validateConfigColumns()
-    {
-
     }
 
 }
