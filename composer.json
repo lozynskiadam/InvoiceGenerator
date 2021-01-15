@@ -1,4 +1,18 @@
 {
+  "name": "lozynskiadam/invoicegenerator",
+  "description": "Simple PHP library to generate invoices",
+  "type" : "library",
+  "authors": [
+    {
+      "name": "Adam Łożyński",
+      "email": "lozynskiadam@gmail.com"
+    }
+  ],
+  "autoload":{
+    "psr-4": {
+      "InvoiceGenerator\\": "src/"
+    }
+  },
   "require": {
     "mpdf/mpdf": "^8.0",
     "twig/twig": "3.0",
