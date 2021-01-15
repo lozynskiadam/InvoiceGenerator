@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice {{ signature }}</title>
+</head>
+
+<style>
+  body {
+    font-size: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-spacing: 0;
+    border-collapse: separate;
+  }
+
+  table.header {
+    font-weight: bold;
+  }
+
+  table.positions {
+    margin: 15px 0;
+  }
+
+  table.positions th {
+    padding: 8px;
+    border-bottom: 2px solid #000000;
+  }
+
+  table.positions td {
+    padding: 8px 5px;
+    border-bottom: 1px dotted #000000;
+  }
+
+  table.tax-summary th {
+    padding: 8px;
+    border-bottom: 2px solid #000000;
+  }
+
+  table.tax-summary td {
+    padding: 8px 5px;
+    border-bottom: 1px dotted #000000;
+  }
+
+  table.annotation th {
+    padding: 8px;
+    border-bottom: 2px solid #000000;
+  }
+
+  table.annotation td {
+    padding: 8px 5px;
+  }
+
+  table.totals {
+    margin: 15px 0;
+  }
+
+</style>
+
+<body>
+
+<table class="header">
+  <tr>
+    <td><h1>INVOICE</h1></td>
+  </tr>
+  <tr>
+    <td>{{ signature ?: '-' }}</td>
+  </tr>
+</table>
+
+<table style="width: 100%; margin: 30px 0px;">
+  <tr>
+    <td style="width: 50%; vertical-align: top;">
+      <p><strong>Issued by</strong></p>
+      <p>
+        {{ seller.name }}<br/>
+        {{ seller.address }}<br/>
+        {{ seller.zip_code }} {{ seller.city }}<br/>
+        Tax ID: {{ seller.tax_id }}
+      </p>
+    </td>
+    <td style="width: 50%; vertical-align: top;">
+      <p><strong>Billed To</strong></p>
+      <p>
+        {{ buyer.name }}<br/>
+        {{ buyer.address }}<br/>
+        {{ buyer.zip_code }} {{ buyer.city }}<br/>
+        Tax ID: {{ buyer.tax_id }}
+      </p>
+    </td>
+  </tr>
+</table>
+
+<table class="payment">
+  <tr>
+    <td>
+      <strong>Issue Date</strong> {{ issue_date }}<br/>
+      <strong>Payment Due Date</strong> {{ payment_due_date }}<br/>
+      {% if sale_date %}<strong>Sale Date</strong> {{ sale_date }}<br/>{% endif %}
+      {% if delivery_date %}<strong>Delivery Date</strong> {{ delivery_date }}<br/>{% endif %}
+      {% if payment_method %}<strong>Payment Method</strong> {{ payment_method }}<br/>{% endif %}
+      {% if bank_account_number %}<strong>Bank Account Number</strong> {{ bank_account_number }}<br/>{% endif %}
+    </td>
+  </tr>
+</table>
+
+<table class="positions">
+  <thead>
+  <tr>
+    {% for column in config.columns %}
+      {% if column == 'position_number' %}
+        <th>#</th>{% endif %}
+      {% if column == 'name' %}
+        <th>Description</th>{% endif %}
+      {% if column == 'unit' %}
+        <th style="max-width: 80px;">UOM</th>{% endif %}
+      {% if column == 'quantity' %}
+        <th style="max-width: 80px;">Quantity</th>{% endif %}
+      {% if column == 'discount' %}
+        <th style="max-width: 80px;">Discount</th>{% endif %}
+      {% if column == 'discount_price' %}
+        <th style="max-width: 80px;">Discount Price</th>{% endif %}
+      {% if column == 'discount_amount' %}
+        <th style="max-width: 80px;">Discount Amount</th>{% endif %}
+      {% if column == 'tax_rate' %}
+        <th style="max-width: 50px;">Tax</th>{% endif %}
+      {% if column == 'tax_price' %}
+        <th style="max-width: 145px;">Tax Price</th>{% endif %}
+      {% if column == 'tax_amount' %}
+        <th style="max-width: 145px;">Tax Value</th>{% endif %}
+      {% if column == 'net_price' %}
+        <th style="max-width: 145px;">Unit Price</th>{% endif %}
+      {% if column == 'net_amount' %}
+        <th style="max-width: 145px;">Amount Net</th>{% endif %}
+      {% if column == 'gross_price' %}
+        <th style="max-width: 145px;">Unit Price Gross</th>{% endif %}
+      {% if column == 'gross_amount' %}
+        <th style="max-width: 145px;">Amount Gross</th>{% endif %}
+    {% endfor %}
+  </tr>
+  </thead>
+  <tbody>
+  {% for key, position in positions %}
+    <tr>
+      {% for column in config.columns %}
+        {% if column == 'position_number' %}
+          <td style="text-align: right;">{{ key }}.</td>{% endif %}
+        {% if column == 'name' %}
+          <td>{{ position.name }}</td>{% endif %}
+        {% if column == 'unit' %}
+          <td style="text-align: center;">{{ position.unit }}</td>{% endif %}
+        {% if column == 'quantity' %}
+          <td style="text-align: center;">{{ position.quantity }}</td>{% endif %}
+        {% if column == 'discount' %}
+          <td style="text-align: center;">
+            {% if discount_type in [constant('InvoiceGenerator\\Constrains::DISCOUNT_TYPE_VALUE_PRICE'), constant('InvoiceGenerator\\Constrains::DISCOUNT_TYPE_VALUE_AMOUNT')] %}
+              {{ position.discount|number_format(2, '.', ' ') }} {{ currency }}
+            {% else %}
+              {{ position.discount }}%
+            {% endif %}
+          </td>
+        {% endif %}
+        {% if column == 'discount_price' %}
+          <td style="text-align: center;">{{ position.discount_price|number_format(2, '.', ' ') }}</td>{% endif %}
+        {% if column == 'discount_amount' %}
+          <td style="text-align: center;">{{ position.discount_amount|number_format(2, '.', ' ') }}</td>{% endif %}
+        {% if column == 'tax_rate' %}
+          <td style="text-align: center;">{{ position.tax_rate }}%</td>{% endif %}
+        {% if column == 'tax_price' %}
+          <td style="text-align: right;">{{ position.tax_price|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+        {% if column == 'tax_amount' %}
+          <td style="text-align: right;">{{ position.tax_amount|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+        {% if column == 'net_price' %}
+          <td style="text-align: right;">{{ position.net_price|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+        {% if column == 'net_amount' %}
+          <td style="text-align: right;">{{ position.net_amount|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+        {% if column == 'gross_price' %}
+          <td style="text-align: right;">{{ position.gross_price|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+        {% if column == 'gross_amount' %}
+          <td style="text-align: right;">{{ position.gross_amount|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+      {% endfor %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<table>
+  <tr>
+    <td style="width: 60%; vertical-align: top; ">
+      {% if annotation %}
+        <table class="annotation">
+          <thead>
+            <tr>
+              <th>Annotation</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td>{{ annotation|nl2br }}</td>
+          </tr>
+          </tbody>
+        </table>
+      {% endif %}
+    </td>
+
+    <td style="width: 10%;"></td>
+
+    <td style="width: 30%; vertical-align: top; ">
+      <table class="tax-summary">
+        <thead>
+        <tr>
+          <th colspan="2" style="width: 35px;">Tax summary</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for rate, amount in tax_summary %}
+          <tr>
+            <td style="text-align: center;">{{ rate }}%</td>
+            <td style="text-align: right;">{{ amount|number_format(2, '.', ' ') }} {{ currency }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td style="text-align: center; border: 0; font-weight: bold;">Total:</td>
+          <td style="text-align: right; border: 0; font-weight: bold;">{{ tax_total|number_format(2, '.', ' ') }} {{ currency }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<table class="totals">
+  <tr>
+    <td style="text-align: right;">
+      <p style="font-size: 35px; font-weight: bold;" class="text-primary">{{ gross_total|number_format(2, '.', ' ') }} {{ currency }}</p>
+      <p style="font-size: 10px;" class="text-primary">{{ gross_total_in_words }}</p>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
