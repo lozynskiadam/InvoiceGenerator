@@ -4,8 +4,48 @@ namespace InvoiceGenerator;
 
 class Invoice
 {
-    private $Params;
-    private $Data;
+    /** @var string */
+    public $language;
+    /** @var string */
+    public $type;
+    /** @var string */
+    public $invoicing_mode;
+    /** @var string */
+    public $issue_date;
+    /** @var string */
+    public $currency;
+    /** @var string */
+    public $discount_type;
+    /** @var string */
+    public $annotation;
+    /** @var array */
+    public $additional;
+    /** @var string */
+    public $payment_due_date;
+    /** @var string */
+    public $payment_method;
+    /** @var array */
+    public $seller;
+    /** @var array */
+    public $buyer;
+    /** @var array */
+    public $positions;
+    /** @var string */
+    public $signature;
+    /** @var array */
+    public $tax_summary;
+    /** @var string */
+    public $tax_total;
+    /** @var string */
+    public $net_total;
+    /** @var string */
+    public $gross_total;
+    /** @var string */
+    public $net_total_in_words;
+    /** @var string */
+    public $gross_total_in_words;
+    /** @var string */
+    public $tax_total_in_words;
 
     /**
      * @param $params
@@ -13,9 +53,9 @@ class Invoice
      */
     public function __construct(array $params)
     {
-        $this->Params = array_merge($this->getDefaultParams(), $params);
-        new Validator($this->Params, null);
-        new Calculator($this->Params, $this->Data);
+        $params = array_merge($this->getDefaultParams(), $params);
+        new Validator($params, null);
+        new Calculator($params, $this);
     }
 
     /**
@@ -26,7 +66,7 @@ class Invoice
     {
         $config = array_merge($this->getDefaultConfig(), $config);
         new Validator(null, $config);
-        new Generator($this->Data, $config);
+        new Generator($this, $config);
     }
 
     private function getDefaultParams()
@@ -55,11 +95,9 @@ class Invoice
         $defaultConfig['columns'][] = Constrains::POSITIONS_COLUMN_NAME;
         $defaultConfig['columns'][] = Constrains::POSITIONS_COLUMN_UNIT;
         $defaultConfig['columns'][] = Constrains::POSITIONS_COLUMN_QUANTITY;
-        foreach($this->Params['positions'] as $position) {
-            if(isset($position['discount']) && $position['discount'] > 0) {
-                $defaultConfig['columns'][] = Constrains::POSITIONS_COLUMN_DISCOUNT;
-                break;
-            }
+        foreach($this->positions as $position) if($position['discount'] > 0) {
+            $defaultConfig['columns'][] = Constrains::POSITIONS_COLUMN_DISCOUNT;
+            break;
         }
         $defaultConfig['columns'][] = Constrains::POSITIONS_COLUMN_TAX_RATE;
         $defaultConfig['columns'][] = Constrains::POSITIONS_COLUMN_NET_PRICE;

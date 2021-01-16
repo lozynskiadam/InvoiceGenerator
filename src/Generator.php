@@ -8,8 +8,9 @@ use Twig\Loader\FilesystemLoader as TwigFSLoader;
 
 class Generator
 {
-    public function __construct(array $data, array $config)
+    public function __construct(Invoice $invoice, array $config)
     {
+        $data['invoice'] = $invoice;
         $data['config'] = $config;
         $twig = new Twig(new TwigFSLoader($config['templates_path']));
         $mpdf = new Mpdf([
@@ -22,7 +23,10 @@ class Generator
             'margin_footer' => 5,
         ]);
         $mpdf->SetFooter('Page {PAGENO}/{nbpg}');
-        $mpdf->WriteHTML($twig->render($config['template'], $data));
+        $mpdf->WriteHTML($twig->render($config['template'], [
+            'invoice' => $invoice,
+            'config' => $config
+        ]));
         $mpdf->Output($config['output']);
     }
 }

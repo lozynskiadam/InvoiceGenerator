@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Invoice {{ signature }}</title>
+  <title>Invoice {{ invoice.signature }}</title>
 </head>
 
 <style>
@@ -66,7 +66,7 @@
     <td><h1>INVOICE</h1></td>
   </tr>
   <tr>
-    <td>{{ signature ?: '-' }}</td>
+    <td>{{ invoice.signature ?: '-' }}</td>
   </tr>
 </table>
 
@@ -75,19 +75,19 @@
     <td style="width: 50%; vertical-align: top;">
       <p><strong>Issued by</strong></p>
       <p>
-        {{ seller.name }}<br/>
-        {{ seller.address }}<br/>
-        {{ seller.zip_code }} {{ seller.city }}<br/>
+        {{ invoice.seller.name }}<br/>
+        {{ invoice.seller.address }}<br/>
+        {{ invoice.seller.zip_code }} {{ invoice.seller.city }}<br/>
         Tax ID: {{ seller.tax_id }}
       </p>
     </td>
     <td style="width: 50%; vertical-align: top;">
       <p><strong>Billed To</strong></p>
       <p>
-        {{ buyer.name }}<br/>
-        {{ buyer.address }}<br/>
-        {{ buyer.zip_code }} {{ buyer.city }}<br/>
-        Tax ID: {{ buyer.tax_id }}
+        {{ invoice.buyer.name }}<br/>
+        {{ invoice.buyer.address }}<br/>
+        {{ invoice.buyer.zip_code }} {{ invoice.buyer.city }}<br/>
+        Tax ID: {{ invoice.buyer.tax_id }}
       </p>
     </td>
   </tr>
@@ -96,12 +96,12 @@
 <table class="payment">
   <tr>
     <td>
-      <strong>Issue Date</strong> {{ issue_date }}<br/>
-      <strong>Payment Due Date</strong> {{ payment_due_date }}<br/>
-      {% if sale_date %}<strong>Sale Date</strong> {{ sale_date }}<br/>{% endif %}
-      {% if delivery_date %}<strong>Delivery Date</strong> {{ delivery_date }}<br/>{% endif %}
-      {% if payment_method %}<strong>Payment Method</strong> {{ payment_method }}<br/>{% endif %}
-      {% if bank_account_number %}<strong>Bank Account Number</strong> {{ bank_account_number }}<br/>{% endif %}
+      <strong>Issue Date</strong> {{ invoice.issue_date }}<br/>
+      <strong>Payment Due Date</strong> {{ invoice.payment_due_date }}<br/>
+      {% if invoice.sale_date %}<strong>Sale Date</strong> {{ invoice.sale_date }}<br/>{% endif %}
+      {% if invoice.delivery_date %}<strong>Delivery Date</strong> {{ invoice.delivery_date }}<br/>{% endif %}
+      {% if invoice.payment_method %}<strong>Payment Method</strong> {{ invoice.payment_method }}<br/>{% endif %}
+      {% if invoice.bank_account_number %}<strong>Bank Account Number</strong> {{ invoice.bank_account_number }}<br/>{% endif %}
     </td>
   </tr>
 </table>
@@ -142,7 +142,7 @@
   </tr>
   </thead>
   <tbody>
-  {% for key, position in positions %}
+  {% for key, position in invoice.positions %}
     <tr>
       {% for column in config.columns %}
         {% if column == 'position_number' %}
@@ -155,31 +155,31 @@
           <td style="text-align: center;">{{ position.quantity }}</td>{% endif %}
         {% if column == 'discount' %}
           <td style="text-align: center;">
-            {% if discount_type in [constant('InvoiceGenerator\\Constrains::DISCOUNT_TYPE_VALUE_PRICE'), constant('InvoiceGenerator\\Constrains::DISCOUNT_TYPE_VALUE_AMOUNT')] %}
-              {{ position.discount|number_format(2, '.', ' ') }} {{ currency }}
+            {% if invoice.discount_type in [constant('InvoiceGenerator\\Constrains::DISCOUNT_TYPE_VALUE_PRICE'), constant('InvoiceGenerator\\Constrains::DISCOUNT_TYPE_VALUE_AMOUNT')] %}
+              {{ position.discount|number_format(2, '.', ' ') }} {{ invoice.currency }}
             {% else %}
               {{ position.discount }}%
             {% endif %}
           </td>
         {% endif %}
         {% if column == 'discount_price' %}
-          <td style="text-align: center;">{{ position.discount_price|number_format(2, '.', ' ') }}</td>{% endif %}
+          <td style="text-align: center;">{{ position.discount_price|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>{% endif %}
         {% if column == 'discount_amount' %}
-          <td style="text-align: center;">{{ position.discount_amount|number_format(2, '.', ' ') }}</td>{% endif %}
+          <td style="text-align: center;">{{ position.discount_amount|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>{% endif %}
         {% if column == 'tax_rate' %}
           <td style="text-align: center;">{{ position.tax_rate }}%</td>{% endif %}
         {% if column == 'tax_price' %}
-          <td style="text-align: right;">{{ position.tax_price|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+          <td style="text-align: right;">{{ position.tax_price|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>{% endif %}
         {% if column == 'tax_amount' %}
-          <td style="text-align: right;">{{ position.tax_amount|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+          <td style="text-align: right;">{{ position.tax_amount|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>{% endif %}
         {% if column == 'net_price' %}
-          <td style="text-align: right;">{{ position.net_price|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+          <td style="text-align: right;">{{ position.net_price|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>{% endif %}
         {% if column == 'net_amount' %}
-          <td style="text-align: right;">{{ position.net_amount|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+          <td style="text-align: right;">{{ position.net_amount|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>{% endif %}
         {% if column == 'gross_price' %}
-          <td style="text-align: right;">{{ position.gross_price|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+          <td style="text-align: right;">{{ position.gross_price|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>{% endif %}
         {% if column == 'gross_amount' %}
-          <td style="text-align: right;">{{ position.gross_amount|number_format(2, '.', ' ') }} {{ currency }}</td>{% endif %}
+          <td style="text-align: right;">{{ position.gross_amount|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>{% endif %}
       {% endfor %}
     </tr>
   {% endfor %}
@@ -189,7 +189,7 @@
 <table>
   <tr>
     <td style="width: 60%; vertical-align: top; ">
-      {% if annotation %}
+      {% if invoice.annotation %}
         <table class="annotation">
           <thead>
             <tr>
@@ -198,7 +198,7 @@
           </thead>
           <tbody>
           <tr>
-            <td>{{ annotation|nl2br }}</td>
+            <td>{{ invoice.annotation|nl2br }}</td>
           </tr>
           </tbody>
         </table>
@@ -215,15 +215,15 @@
         </tr>
         </thead>
         <tbody>
-        {% for rate, amount in tax_summary %}
+        {% for rate, amount in invoice.tax_summary %}
           <tr>
             <td style="text-align: center;">{{ rate }}%</td>
-            <td style="text-align: right;">{{ amount|number_format(2, '.', ' ') }} {{ currency }}</td>
+            <td style="text-align: right;">{{ amount|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>
           </tr>
         {% endfor %}
         <tr>
           <td style="text-align: center; border: 0; font-weight: bold;">Total:</td>
-          <td style="text-align: right; border: 0; font-weight: bold;">{{ tax_total|number_format(2, '.', ' ') }} {{ currency }}</td>
+          <td style="text-align: right; border: 0; font-weight: bold;">{{ invoice.tax_total|number_format(2, '.', ' ') }} {{ invoice.currency }}</td>
         </tr>
         </tbody>
       </table>
@@ -234,8 +234,8 @@
 <table class="totals">
   <tr>
     <td style="text-align: right;">
-      <p style="font-size: 35px; font-weight: bold;" class="text-primary">{{ gross_total|number_format(2, '.', ' ') }} {{ currency }}</p>
-      <p style="font-size: 10px;" class="text-primary">{{ gross_total_in_words }}</p>
+      <p style="font-size: 35px; font-weight: bold;" class="text-primary">{{ invoice.gross_total|number_format(2, '.', ' ') }} {{ invoice.currency }}</p>
+      <p style="font-size: 10px;" class="text-primary">{{ invoice.gross_total_in_words }}</p>
     </td>
   </tr>
 </table>
