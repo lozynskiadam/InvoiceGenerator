@@ -38,7 +38,6 @@ class Invoice
             'issue_date' => date('Y-m-d'),
             'currency' => Constrains::CURRENCY_POUND_STERLING['Label'],
             'discount_type' => Constrains::DISCOUNT_TYPE_VALUE_PRICE,
-            'payment_amount' => 0,
             'annotation' => '',
             'additional' => []
         ];

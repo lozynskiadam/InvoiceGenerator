@@ -22,7 +22,6 @@ class Validator
             Validator::validateParamsInvoiceType();
             Validator::validateParamsInvoicingMode();
             Validator::validateParamsPaymentMethod();
-            Validator::validateParamsPaymentAmount();
             Validator::validateParamsCurrency();
             Validator::validateParamsDiscountType();
             Validator::validateParamsDates();
@@ -62,13 +61,6 @@ class Validator
     {
         if (!isset($this->params['payment_method']) || !is_string($this->params['payment_method'])) {
             throw new InvoiceException('invalid payment method');
-        }
-    }
-
-    private function validateParamsPaymentAmount()
-    {
-        if (!is_numeric($this->params['payment_amount'])) {
-            throw new InvoiceException('invalid payment amount');
         }
     }
 
